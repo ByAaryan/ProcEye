@@ -23,6 +23,12 @@ The monitor currently consists of standalone modules capable of the following:
 * **Calculation:** Converts kernel data (kB) into human-readable formats (GB).
 * **Usage Stats:** Calculates Total, Free, Available, and Used memory percentages.
 
+### CPU Usage Analysis (`cpu.py`)
+* **Processor Information:** Retrieves CPU count and model details from `/proc/cpuinfo`.
+* **Usage Calculation:** Parses `/proc/stat` to compute CPU utilization percentages.
+* **Per-Core Metrics:** Displays individual core usage statistics.
+* **System Overview:** Shows aggregate CPU usage across all processors.
+
 ## Requirements
 * **OS:** Linux (Tested on Arch-based distributions, but should work on any standard Linux kernel).
 * **Python:** 3.6+

@@ -48,6 +48,8 @@ def main():
         proc_data = status(pid)
         if proc_data:
             state = proc_data.get('State', 'Unknown')
+        else:
+            state = 'Unknown'
         print(f"PID: {pid}, Name: {get_process_names(pid)}, state: {state}")
 
     print("\nCurrently running processes:")
