@@ -8,7 +8,7 @@ def get_pids():
             pids.append(entry)
     return pids
 
-def get_process_names(pid):
+def get_process_name(pid):
     
     """Retrieve the name of the process given their PID."""
     
@@ -37,24 +37,6 @@ def running_processes():
         proc_data = status(pid)
         if proc_data:
             state = proc_data.get('State', 'Unknown')
-            if 'R' in state:
-                processes[pid] = get_process_names(pid)
+            if 'R' in state or 'S' in state or 'D' in state:
+                processes[pid] = get_process_name(pid)
     return processes
-
-def main():
-    
-    print("Welcome!! \n following will be the processes on your system:")
-    for pid in get_pids():
-        proc_data = status(pid)
-        if proc_data:
-            state = proc_data.get('State', 'Unknown')
-        else:
-            state = 'Unknown'
-        print(f"PID: {pid}, Name: {get_process_names(pid)}, state: {state}")
-
-    print("\nCurrently running processes:")
-    running_procs = running_processes()
-    for pid, name in running_procs.items():
-        print(f"PID: {pid}, Name: {name}")
-
-main()

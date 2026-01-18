@@ -16,17 +16,13 @@ def read_all_cpu_stats():
         return None
 
 
-def cpu_usage():
+def cpu_usage(core,cpu1,cpu2):
     """Calculate CPU usage percentage."""
-    cpu1 = read_all_cpu_stats()
-    time.sleep(1)
-    cpu2 = read_all_cpu_stats()
 
-    total1 = sum(cpu1['cpu'][0:9])
-    total2 = sum(cpu2['cpu'][0:9])
-
-    idle1 = cpu1['cpu'][3]
-    idle2 = cpu2['cpu'][3]
+    total1 = sum(cpu1[core][0:9])
+    total2 = sum(cpu2[core][0:9])
+    idle1 = cpu1[core][3]
+    idle2 = cpu2[core][3]
 
     total_diff = total2 - total1
     idle_diff = idle2 - idle1
@@ -34,6 +30,4 @@ def cpu_usage():
     usage = (total_diff - idle_diff)/total_diff * 100 if total_diff != 0 else 0
     return usage
 
-print(read_all_cpu_stats())
-print(f"CPU Usage: {cpu_usage():.2f}%")
             
