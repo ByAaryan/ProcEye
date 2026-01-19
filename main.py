@@ -29,7 +29,7 @@ class ProcEye(App):
 
     """
 
-    BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
+    BINDINGS = [("d", "toggle_dark", "Toggle dark mode"), ("m", "sort_by_memory", "Sort Processes by Memory")]
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
@@ -52,12 +52,23 @@ class ProcEye(App):
 
     def on_mount(self):
         """Called when the app is mounted."""
-        self.process_table.add_columns("process ID", "process Name")
+        self.process_table.add_columns("process ID", "process Name", "Memory Usage")
         self.cpu_usage_table.add_columns("CPU Core", "Usage %")
         self.memory_table.add_columns("Metric", "Value")
+
         self.last_cpu_stats = read_all_cpu_stats()
         self.set_interval(1, self.update_fast_stats)
         self.set_interval(5, self.update_slow_stats)
+        self.sort_by_memory = False
+        self.proc_data = {}
+
+    def action_sort_by_memory(self) -> None:
+        """An action to sort processes by memory usage."""
+        if not self.sort_by_memory:
+            self.sort_by_memory = True
+        else:
+            self.sort_by_memory = False
+        self.render_process_data()
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
@@ -72,7 +83,7 @@ class ProcEye(App):
         current_stats = read_all_cpu_stats()
         for cpu_id in current_stats.keys():
             usage = cpu_usage(cpu_id, self.last_cpu_stats, current_stats)
-            self.cpu_usage_table.add_row(cpu_id, f"{usage:.2f}%")
+            self.cpu_usage_table.add_row(cpu_id, f"{self.bar(usage)} {usage:.2f}%")
         self.last_cpu_stats = current_stats
 
         """Update Memory stats."""
@@ -82,15 +93,31 @@ class ProcEye(App):
             self.memory_table.add_row("Total Memory", f"{mem_stats['MemTotal']:.2f} GB")
             self.memory_table.add_row("Available Memory", f"{mem_stats['MemAvailable']:.2f} GB")
             self.memory_table.add_row("Used Memory", f"{mem_stats['MemUsed']:.2f} GB")
-            self.memory_table.add_row("Memory Usage Percentage", f"{mem_stats['MemUsagePercentage']:.2f}%")
+            mem_bar = self.bar(mem_stats['MemUsagePercentage'])
+            self.memory_table.add_row("Memory Usage:", f"{mem_bar} {mem_stats['MemUsagePercentage']:.2f}%")
+
+    def bar(self, percent, width=20):
+        filled = int((percent / 100) * width)
+        empty = width - filled
+        return "(" + "#" * filled + "-" * empty + ")"
+
+    
+    def render_process_data(self):
+        """Render process data in the table."""
+        self.process_table.clear()
+        proc_data = self.proc_data
+        if self.sort_by_memory:
+            proc_data = dict(sorted(proc_data.items(), key=lambda item: item[1][1], reverse=True))
+        for pid, (name, memory) in proc_data.items():
+            self.process_table.add_row(str(pid), str(name), f"{memory:.2f} MB")
+
         
+    
     def update_slow_stats(self):
 
         """Update process list."""
-        self.process_table.clear()
-        proc_data = running_processes()
-        for pid, name in proc_data.items():
-            self.process_table.add_row(str(pid), str(name))
+        self.proc_data = running_processes()
+        self.render_process_data()
 
 if __name__ == "__main__":
     app = ProcEye()

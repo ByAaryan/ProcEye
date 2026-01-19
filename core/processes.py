@@ -37,6 +37,7 @@ def running_processes():
         proc_data = status(pid)
         if proc_data:
             state = proc_data.get('State', 'Unknown')
+            proc_memory_inMB = int(proc_data.get('VmRSS', '0 kb').split()[0])/(1024)
             if 'R' in state or 'S' in state or 'D' in state:
-                processes[pid] = get_process_name(pid)
+                processes[pid] = (proc_data.get('Name', 'Unknown'), proc_memory_inMB)
     return processes
