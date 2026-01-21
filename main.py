@@ -5,13 +5,17 @@ from core.CPU import *
 from core.memory import *
 from core.processes import *
 from core.network import *
-
+from core.disk import *
 
 class ProcEye(App):
     """System Monitor."""
 
     CSS = """
-
+    
+    #disk_table {
+        height: 30%;
+        border: solid purple;
+    }
 
     #network_table {
         height: 30%;
@@ -19,7 +23,7 @@ class ProcEye(App):
     }
 
     #cpu_table {
-        height: 50%;
+        height: 40%;
         border: solid green;
     }
 
@@ -30,7 +34,7 @@ class ProcEye(App):
     }
 
     #mem_table {
-        height: 50%;
+        height: 30%;
         border: solid red;
     }
 
@@ -46,12 +50,14 @@ class ProcEye(App):
         self.cpu_usage_table = DataTable(id="cpu_table")
         self.memory_table = DataTable(id="mem_table")
         self.network_table = DataTable(id="network_table")
+        self.disk_table = DataTable(id="disk_table")
 
         yield Horizontal(
 
             Vertical(
                 self.memory_table,
                 self.cpu_usage_table,
+                self.disk_table,
             ),
 
             Vertical(
@@ -67,6 +73,7 @@ class ProcEye(App):
         self.cpu_usage_table.add_columns("CPU Core", "Usage %")
         self.memory_table.add_columns("Metric", "Value")
         self.network_table.add_columns("Interface", "RX Speed", "TX Speed")
+        self.disk_table.add_columns("Metric", "Value")
 
         self.last_cpu_stats = read_all_cpu_stats()
 
@@ -130,7 +137,6 @@ class ProcEye(App):
         empty = width - filled
         return "(" + "#" * filled + "-" * empty + ")"
 
-
     def render_process_data(self):
         """Render process data in the table."""
         self.process_table.clear()
@@ -140,16 +146,19 @@ class ProcEye(App):
         for pid, (name, memory) in proc_data.items():
             self.process_table.add_row(str(pid), str(name), f"{memory:.2f} MB")
 
-
-
     def update_slow_stats(self):
 
         """Update process list."""
         self.proc_data = running_processes()
         self.render_process_data()
 
+        """update Disk stats."""
+        self.disk_table.clear()
+        disk_usage = get_disk_usage('/')
+        self.disk_table.add_row("Total Space", f"{bytes_to_gb(disk_usage['total_space'])} GB")
+        self.disk_table.add_row("Used Space", f"{bytes_to_gb(disk_usage['used_space'])} GB")
+        self.disk_table.add_row("Free Space", f"{bytes_to_gb(disk_usage['free_space'])} GB")
+
 if __name__ == "__main__":
     app = ProcEye()
     app.run()
-
-

@@ -7,14 +7,14 @@ Unlike standard monitoring tools that rely on high-level libraries like `psutil`
 ![ProcEye TUI Dashboard](assets/screenshot.png)
 
 ## Project Status:
-Core monitoring features are functional, and a Textual-based TUI (Terminal User Interface) has been implemented. The project is currently stable for monitoring CPU, RAM, Network, and Process lists.
+Core monitoring features are functional, and a Textual-based TUI (Terminal User Interface) has been implemented. The project is currently stable for monitoring CPU, RAM, Network, Disk, and Process lists.
 
 ## Features
 
 ### 🖥️ TUI Dashboard (`main.py`)
 A modern, responsive terminal interface built with `Textual`.
-* **Split-View Layout:** Simultaneously view Processes, CPU, Memory, and Network stats.
-* **Live Updates:** Non-blocking, real-time updates for CPU/RAM/Network (1s interval) and Processes (5s interval).
+* **Split-View Layout:** Simultaneously view Processes, CPU, Memory, Network, and Disk stats.
+* **Live Updates:** Non-blocking, real-time updates for CPU/RAM/Network/Disk (1s interval) and Processes (5s interval).
 * **Sorting & Filtering:** Sort processes by Memory usage or PID dynamically.
 * **Interactive Tables:** Scrollable process lists and resource usage tables.
 
@@ -23,6 +23,7 @@ A modern, responsive terminal interface built with `Textual`.
 * **Memory Analysis:** Parses `/proc/meminfo` to calculate Total, Free, Available, and Used memory in real-time.
 * **CPU Usage:** Reads `/proc/stat` to calculate per-core and total CPU usage percentages using differential time snapshots.
 * **Network Monitoring:** Parses `/proc/net/dev` to calculate real-time Download (RX) and Upload (TX) speeds.
+* **Disk Monitoring:** Parses `/proc/diskstats` to monitor Read/Write speeds for physical drives and uses system calls (`statvfs`) to calculate Total, Used, and Free disk space.
 
 ## Requirements
 * **OS:** Linux (Tested on Arch-based distributions; compatible with any standard Linux kernel).
