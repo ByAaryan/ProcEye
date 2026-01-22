@@ -76,8 +76,9 @@ class ProcEye(App):
         self.disk_table.add_columns("Metric", "Value")
 
         self.last_cpu_stats = read_all_cpu_stats()
-
+        self.last_disk_io_stats = get_disk_io_stats()
         self.old_network_stat = network_stat()
+
         self.sort_by_memory = False
         self.proc_data = {}
 
@@ -122,6 +123,21 @@ class ProcEye(App):
             mem_bar = self.bar(mem_stats['MemUsagePercentage'])
             self.memory_table.add_row("Memory Usage:", f"{mem_bar} {mem_stats['MemUsagePercentage']:.2f}%")
 
+        """Update Disk I/O stats."""
+        self.disk_table.clear()
+        new_disk_io_stats = get_disk_io_stats()
+        interval = 1  # seconds
+        each_disk_io_speeds = calculate_disk_IO_speed(self.last_disk_io_stats, new_disk_io_stats, interval)
+        total_read, total_write = total_disk_io_speed(each_disk_io_speeds)
+        self.disk_table.add_row("Total Read Speed", format_speed(total_read))
+        self.disk_table.add_row("Total Write Speed", format_speed(total_write))
+        self.last_disk_io_stats = new_disk_io_stats
+        """update Disk stats."""
+        disk_usage = get_disk_usage('/')
+        self.disk_table.add_row("Total Space", f"{bytes_to_gb(disk_usage['total_space'])} GB")
+        self.disk_table.add_row("Used Space", f"{bytes_to_gb(disk_usage['used_space'])} GB")
+        self.disk_table.add_row("Free Space", f"{bytes_to_gb(disk_usage['free_space'])} GB")
+
         """Update Network stats."""
         self.network_table.clear()
         new_network_stat = network_stat()
@@ -151,13 +167,6 @@ class ProcEye(App):
         """Update process list."""
         self.proc_data = running_processes()
         self.render_process_data()
-
-        """update Disk stats."""
-        self.disk_table.clear()
-        disk_usage = get_disk_usage('/')
-        self.disk_table.add_row("Total Space", f"{bytes_to_gb(disk_usage['total_space'])} GB")
-        self.disk_table.add_row("Used Space", f"{bytes_to_gb(disk_usage['used_space'])} GB")
-        self.disk_table.add_row("Free Space", f"{bytes_to_gb(disk_usage['free_space'])} GB")
 
 if __name__ == "__main__":
     app = ProcEye()
